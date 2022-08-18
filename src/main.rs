@@ -7,10 +7,10 @@ use regex::Regex;
 #[derive(Parser)]
 struct CliInputs {
     // Users would input the command like this:
-    // `rust-forexcan eur can`
+    // `rust-forexcan eur cad`
     // where:
     //  eur is the currency you have (the from)
-    //  can is the currency you want (the to)
+    //  cad is the currency you want (the to)
     // Whether the inputs are in caps or not does not matter.
     from_cur: String,
     to_cur: String,
