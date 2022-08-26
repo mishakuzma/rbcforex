@@ -8,11 +8,10 @@ use regex::Regex;
 struct CliInputs {
     // Users would input the command like this:
     // `rust-forexcan eur cad`
-    // where:
-    //  eur is the currency you have (the from)
-    //  cad is the currency you want (the to)
-    // Whether the inputs are in caps or not does not matter.
+
+    /// The currency you want to trade to get to_cur. Case insensitive.
     from_cur: String,
+    /// the currency you want to receive by giving from_cur. Case insensitive.
     to_cur: String,
 }
 
