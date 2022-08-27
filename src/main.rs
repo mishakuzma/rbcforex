@@ -16,6 +16,7 @@ struct CliInputs {
     to_cur: String,
 }
 
+#[derive(Serialize, Deserialize)]
 struct BankResponse {
     moneyReceived: f32,
     frate: f32,
@@ -39,8 +40,11 @@ impl BankCall {
         return complete_url;
     }
     
-    fn complete_call(&self, in_url: String) -> serde_json::Value {
-        let call = reqwest::blocking::get(in_url).unwrap().json::<serde_json::Value>().unwrap();
+    fn complete_call(&self, in_url: String) -> BankResponse {
+        let call = reqwest::blocking::get(in_url)
+            .expect("Get Request Failed.")
+            .json()
+            .expect("Get response unreadable to json.");
         return call;
     }
 
