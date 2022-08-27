@@ -43,6 +43,7 @@ impl BankCall {
     fn complete_call(&self, in_url: String) -> BankResponse {
         let call = reqwest::blocking::get(in_url)
             .expect("Get Request Failed.")
+            // FIXME .json cannot serialize response's string to f32
             .json()
             .expect("Json encoding error");
         return call;
