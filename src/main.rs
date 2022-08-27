@@ -16,9 +16,9 @@ struct CliInputs {
     to_cur: String,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 struct BankResponse {
-    moneyReceived: f32,
+    amount: f32,
     frate: f32,
     trate: f32,
 }
@@ -44,7 +44,7 @@ impl BankCall {
         let call = reqwest::blocking::get(in_url)
             .expect("Get Request Failed.")
             .json()
-            .expect("Get response unreadable to json.");
+            .expect("Json encoding error");
         return call;
     }
 
@@ -66,9 +66,10 @@ impl BankCall {
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
         // println!("{}", rates);
-        match rates.get("frate") {
-            Some(string) => println!("RBC's rate for {1} to {2}: {0}", 
-                &BankCall::remove_wrapping_quotes(string),
+        match rates.frate {
+            f32 => println!("RBC's rate for {1} to {2}: {0}", 
+                // &BankCall::remove_wrapping_quotes(string),
+                f32,
                 &self.params["from"], 
                 &self.params["to"]),
             _ => println!("Exchange rate not found. Did you enter the currency name right?"),
@@ -77,6 +78,7 @@ impl BankCall {
     }
 }
 
+const RBC_RATES_URL: &str = "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
 fn call_rbc(from_cur: String, to_cur: String) {
     let rbc_call = BankCall::new(
         "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string(),
