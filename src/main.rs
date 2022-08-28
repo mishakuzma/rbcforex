@@ -1,8 +1,9 @@
 use clap::Parser;
+use reqwest::Response;
 use std::collections::HashMap;
 use url::Url;
 use serde_json;
-use serde::{Serialize, Deserialize};
+use serde::{Serialize, Deserialize, Deserializer};
 use regex::Regex;
 
 #[derive(Parser)]
@@ -19,8 +20,20 @@ struct CliInputs {
 #[derive(Deserialize)]
 struct BankResponse {
     amount: f32,
+    #[serde(deserialize_with = "deserialize_f32")]
     frate: f32,
+    #[serde(deserialize_with = "deserialize_f32")]
     trate: f32,
+}
+
+fn deserialize_f32<'de, D, T>(deserializer: D) -> Result<T, D::Error> 
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    let string_de = <&str>::deserialize(deserializer)?;
+    let return_value = serde_json::from_str(&string_de[..]).map_err(serde::de::Error::custom)?;
+    Ok(return_value)
 }
 
 struct BankCall {
@@ -41,11 +54,11 @@ impl BankCall {
     }
     
     fn complete_call(&self, in_url: String) -> BankResponse {
-        let call = reqwest::blocking::get(in_url)
-            .expect("Get Request Failed.")
+        let call_resp = reqwest::blocking::get(in_url)
+            .expect("Get Request Failed.");
             // FIXME .json cannot serialize response's string to f32
-            .json()
-            .expect("Json encoding error");
+        println!("{:?}", call_resp);
+        let call: BankResponse = call_resp.json::<BankResponse>().expect("Json parsing error.");
         return call;
     }
 
@@ -62,7 +75,6 @@ impl BankCall {
         let complete_url = &self.complete_url().expect(
             "Url could not be parsed. Did you enter your arguments right?"
         );
-        // println!("url being sent: {}", complete_url.as_str());
 
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
@@ -75,14 +87,13 @@ impl BankCall {
                 &self.params["to"]),
             _ => println!("Exchange rate not found. Did you enter the currency name right?"),
         }
-    //    let body: String = reqwest::get(&self.url).text(); 
     }
 }
 
 const RBC_RATES_URL: &str = "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
 fn call_rbc(from_cur: String, to_cur: String) {
     let rbc_call = BankCall::new(
-        "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string(),
+       RBC_RATES_URL.to_string(),
         HashMap::from([
             ("do".to_string(), "conv".to_string()),
             ("from".to_string(), from_cur.to_string()),
