@@ -3,7 +3,8 @@ use reqwest;
 use std::collections::HashMap;
 use url::Url;
 use serde_json;
-use serde::{Serialize, Deserialize, Deserializer};
+use serde::{ Deserialize, Deserializer};
+// use serde::Serialize;
 // use regex::Regex;
 
 #[derive(Parser)]
@@ -19,17 +20,19 @@ struct CliInputs {
 
 #[derive(Deserialize)]
 struct BankResponse {
-    amount: String,
-    // #[serde(deserialize_with = "deserialize_f32")]
-    frate: String,
-    // #[serde(deserialize_with = "deserialize_f32")]
+    // #[serde(deserialize_with = "deserialize_f64")]
+    // amount: f64,
+    #[serde(deserialize_with = "deserialize_f64")]
+    frate: f64,
 }
 
-fn deserialize_f32<'de, D, T>(deserializer: D) -> Result<T, D::Error> 
+fn deserialize_f64<'de, D, T>(deserializer: D) -> Result<T, D::Error> 
 where
     D: Deserializer<'de>,
     T: Deserialize<'de>,
 {
+    // FIXME: This does not translate values to f32. Its because the string
+    //  is read in as \"1.26\" or similar. I think the \ is breaking.
     let string_de = <&str>::deserialize(deserializer)?;
     let return_value = serde_json::from_str(&string_de[..]).map_err(serde::de::Error::custom)?;
     Ok(return_value)
@@ -77,14 +80,13 @@ impl BankCall {
 
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
-        // println!("{}", rates);
         match &rates.frate {
-            f32 => println!("RBC's rate for {1} to {2}: {0}", 
+            f64 => println!("RBC's rate for {1} to {2}: {0}", 
                 // &BankCall::remove_wrapping_quotes(string),
-                f32,
+                f64,
                 &self.params["from"], 
                 &self.params["to"]),
-            _ => println!("Exchange rate not found. Did you enter the currency name right?"),
+            // _ => println!("Exchange rate not found. Did you enter the currency name right?"),
         }
     }
 }
@@ -107,7 +109,6 @@ fn call_rbc(from_cur: String, to_cur: String) {
 fn main() {
     // users will submit two arguments telling us what currencies are involved
     let args = CliInputs::parse();
-    // println!("Currency conversion: {0} | {1}", args.from_cur, args.to_cur);
     
     call_rbc(args.from_cur, args.to_cur);
 }
