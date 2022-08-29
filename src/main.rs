@@ -1,10 +1,10 @@
 use clap::Parser;
-use reqwest::Response;
+use reqwest;
 use std::collections::HashMap;
 use url::Url;
 use serde_json;
 use serde::{Serialize, Deserialize, Deserializer};
-use regex::Regex;
+// use regex::Regex;
 
 #[derive(Parser)]
 struct CliInputs {
@@ -19,11 +19,10 @@ struct CliInputs {
 
 #[derive(Deserialize)]
 struct BankResponse {
-    amount: f32,
-    #[serde(deserialize_with = "deserialize_f32")]
-    frate: f32,
-    #[serde(deserialize_with = "deserialize_f32")]
-    trate: f32,
+    amount: String,
+    // #[serde(deserialize_with = "deserialize_f32")]
+    frate: String,
+    // #[serde(deserialize_with = "deserialize_f32")]
 }
 
 fn deserialize_f32<'de, D, T>(deserializer: D) -> Result<T, D::Error> 
@@ -57,18 +56,18 @@ impl BankCall {
         let call_resp = reqwest::blocking::get(in_url)
             .expect("Get Request Failed.");
             // FIXME .json cannot serialize response's string to f32
-        println!("{:?}", call_resp);
-        let call: BankResponse = call_resp.json::<BankResponse>().expect("Json parsing error.");
+        // println!("{:?}", call_resp);
+        let call: BankResponse = call_resp.json::<BankResponse>().expect("json parser error.");
         return call;
     }
 
-    fn remove_wrapping_quotes(json_value: &serde_json::Value) -> &str {
-        let re = Regex::new(r"[0-9.]+").expect(
-            "Error making regex to filter wrapping quotes. This is a bug!"
-        );
-        // println!("{}",re.find(&json_value.as_str().unwrap()).unwrap().as_str());
-        return re.find(&json_value.as_str().unwrap()).unwrap().as_str();
-    }
+    // fn remove_wrapping_quotes(json_value: &serde_json::Value) -> &str {
+    //     let re = Regex::new(r"[0-9.]+").expect(
+    //         "Error making regex to filter wrapping quotes. This is a bug!"
+    //     );
+    //     // println!("{}",re.find(&json_value.as_str().unwrap()).unwrap().as_str());
+    //     return re.find(&json_value.as_str().unwrap()).unwrap().as_str();
+    // }
 
     fn execute(&self) {
         // Create the url that we are going to send for our request.
@@ -79,7 +78,7 @@ impl BankCall {
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
         // println!("{}", rates);
-        match rates.frate {
+        match &rates.frate {
             f32 => println!("RBC's rate for {1} to {2}: {0}", 
                 // &BankCall::remove_wrapping_quotes(string),
                 f32,
