@@ -1,15 +1,14 @@
 use clap::Parser;
 use reqwest;
+use serde::{Deserialize, Deserializer};
+use serde_json;
 use std::collections::HashMap;
 use url::Url;
-use serde_json;
-use serde::{ Deserialize, Deserializer};
 
 #[derive(Parser)]
 pub struct CliInputs {
     // Users would input the command like this:
     // `rust-forexcan eur cad`
-
     /// The currency you want to trade to get to_cur. Case insensitive.
     pub from_cur: String,
     /// the currency you want to receive by giving from_cur. Case insensitive.
@@ -24,7 +23,7 @@ struct BankResponse {
     frate: f64,
 }
 
-fn deserialize_f64<'de, D, T>(deserializer: D) -> Result<T, D::Error> 
+fn deserialize_f64<'de, D, T>(deserializer: D) -> Result<T, D::Error>
 where
     D: Deserializer<'de>,
     T: Deserialize<'de>,
@@ -38,7 +37,7 @@ where
 
 struct BankCall {
     url: String,
-    params: HashMap<String,String>,
+    params: HashMap<String, String>,
 }
 
 impl BankCall {
@@ -47,18 +46,17 @@ impl BankCall {
     }
 
     fn complete_url(&self) -> Result<Url, url::ParseError> {
-        let complete_url = Url::parse_with_params(
-            &self.url, 
-            &self.params);
+        let complete_url = Url::parse_with_params(&self.url, &self.params);
         return complete_url;
     }
-    
+
     fn complete_call(&self, in_url: String) -> BankResponse {
-        let call_resp = reqwest::blocking::get(in_url)
-            .expect("Get Request Failed.");
-            // FIXME .json cannot serialize response's string to f32
+        let call_resp = reqwest::blocking::get(in_url).expect("Get Request Failed.");
+        // FIXME .json cannot serialize response's string to f32
         // println!("{:?}", call_resp);
-        let call: BankResponse = call_resp.json::<BankResponse>().expect("json parser error.");
+        let call: BankResponse = call_resp
+            .json::<BankResponse>()
+            .expect("json parser error.");
         return call;
     }
 
@@ -72,35 +70,39 @@ impl BankCall {
 
     fn execute(&self) {
         // Create the url that we are going to send for our request.
-        let complete_url = &self.complete_url().expect(
-            "Url could not be parsed. Did you enter your arguments right?"
-        );
+        let complete_url = &self
+            .complete_url()
+            .expect("Url could not be parsed. Did you enter your arguments right?");
 
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
         match &rates.frate {
-            f64 => println!("RBC's rate for {1} to {2}: {0}", 
+            f64 => println!(
+                "RBC's rate for {1} to {2}: {0}",
                 // &BankCall::remove_wrapping_quotes(string),
                 f64,
-                &self.params["from"], 
-                &self.params["to"]),
+                &self.params["from"],
+                &self.params["to"]
+            ),
             // _ => println!("Exchange rate not found. Did you enter the currency name right?"),
         }
     }
 }
 
-const RBC_RATES_URL: &str = "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
+const RBC_RATES_URL: &str =
+    "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
 pub fn call_rbc(from_cur: String, to_cur: String) {
     let rbc_call = BankCall::new(
-       RBC_RATES_URL.to_string(),
+        RBC_RATES_URL.to_string(),
         HashMap::from([
             ("do".to_string(), "conv".to_string()),
             ("from".to_string(), from_cur.to_string()),
             ("to".to_string(), to_cur.to_string()),
             ("trade".to_string(), "sell".to_string()),
             ("amount".to_string(), "1".to_string()),
-        ])
-    );    
-    
+        ]),
+    );
+
     rbc_call.execute();
 }
+
