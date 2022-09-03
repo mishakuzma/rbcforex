@@ -66,23 +66,33 @@ impl BankCall {
     //     return re.find(&json_value.as_str().unwrap()).unwrap().as_str();
     // }
 
-    fn execute(&self) {
+    /// Returns a 3 item tuple, where
+    /// 0: The unit rate of currency (f64)
+    /// 1: The currency that was given (&String)
+    /// 2: The currency that was received (&String)
+    /// The currencies exchanged are references to the bankcall object fields.
+    /// Panics
+    /// When the url cannot be parsed, likely because the arguments are wrong.
+    fn execute(&self) -> (f64, &String, &String) {
         // Create the url that we are going to send for our request.
         let complete_url = &self
             .complete_url()
             .expect("Url could not be parsed. Did you enter your arguments right?");
 
+        // call the bank for current rates
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
-        let rates = completed_call;
-        // let f64 = &rates.frate; {
+        
+        // TODO: Remove this print line and let it be handled
         println!(
             "RBC's rate for {1} to {2}: {0}",
-            // &BankCall::remove_wrapping_quotes(string),
-            &rates.frate,
+            &completed_call.frate,
             &self.params["from"],
             &self.params["to"]
         );
-        // _ => println!("Exchange rate not found. Did you enter the currency name right?"),
+
+        // Current rates are returned as owned because they are unique per call.
+        // From and To are always available in the call, so refs are fine.
+        (completed_call.frate, &self.params["from"], &self.params["to"])
     }
 }
 
