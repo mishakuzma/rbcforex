@@ -1,7 +1,5 @@
 use clap::Parser;
-use reqwest;
 use serde::{Deserialize, Deserializer};
-use serde_json;
 use std::collections::HashMap;
 use url::Url;
 
@@ -17,6 +15,8 @@ pub struct CliInputs {
 
 #[derive(Deserialize)]
 struct BankResponse {
+    // F64 is used because it does not seem to work to deserialize into F32.
+    //     I've checked the serde docs and it does not seem to be a f32 method.
     // #[serde(deserialize_with = "deserialize_f64")]
     // amount: f64,
     #[serde(deserialize_with = "deserialize_f64")]
@@ -31,7 +31,7 @@ where
     // FIXME: This does not translate values to f32. Its because the string
     //  is read in as \"1.26\" or similar. I think the \ is breaking.
     let string_de = <&str>::deserialize(deserializer)?;
-    let return_value = serde_json::from_str(&string_de[..]).map_err(serde::de::Error::custom)?;
+    let return_value = serde_json::from_str(string_de).map_err(serde::de::Error::custom)?;
     Ok(return_value)
 }
 
@@ -46,18 +46,16 @@ impl BankCall {
     }
 
     fn complete_url(&self) -> Result<Url, url::ParseError> {
-        let complete_url = Url::parse_with_params(&self.url, &self.params);
-        return complete_url;
+        Url::parse_with_params(&self.url, &self.params)
     }
 
     fn complete_call(&self, in_url: String) -> BankResponse {
         let call_resp = reqwest::blocking::get(in_url).expect("Get Request Failed.");
         // FIXME .json cannot serialize response's string to f32
         // println!("{:?}", call_resp);
-        let call: BankResponse = call_resp
+        call_resp
             .json::<BankResponse>()
-            .expect("json parser error.");
-        return call;
+            .expect("json parser error.")
     }
 
     // fn remove_wrapping_quotes(json_value: &serde_json::Value) -> &str {
@@ -76,16 +74,15 @@ impl BankCall {
 
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
         let rates = completed_call;
-        match &rates.frate {
-            f64 => println!(
-                "RBC's rate for {1} to {2}: {0}",
-                // &BankCall::remove_wrapping_quotes(string),
-                f64,
-                &self.params["from"],
-                &self.params["to"]
-            ),
-            // _ => println!("Exchange rate not found. Did you enter the currency name right?"),
-        }
+        // let f64 = &rates.frate; {
+        println!(
+            "RBC's rate for {1} to {2}: {0}",
+            // &BankCall::remove_wrapping_quotes(string),
+            &rates.frate,
+            &self.params["from"],
+            &self.params["to"]
+        );
+        // _ => println!("Exchange rate not found. Did you enter the currency name right?"),
     }
 }
 
@@ -96,8 +93,8 @@ pub fn call_rbc(from_cur: String, to_cur: String) {
         RBC_RATES_URL.to_string(),
         HashMap::from([
             ("do".to_string(), "conv".to_string()),
-            ("from".to_string(), from_cur.to_string()),
-            ("to".to_string(), to_cur.to_string()),
+            ("from".to_string(), from_cur),
+            ("to".to_string(), to_cur),
             ("trade".to_string(), "sell".to_string()),
             ("amount".to_string(), "1".to_string()),
         ]),
@@ -105,4 +102,3 @@ pub fn call_rbc(from_cur: String, to_cur: String) {
 
     rbc_call.execute();
 }
-
