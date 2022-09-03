@@ -49,15 +49,26 @@ impl BankCall {
         Url::parse_with_params(&self.url, &self.params)
     }
 
+    /// Complete call takes a String and returns a completed BankResponse.
+    /// Inputs
+    /// 0: &self
+    /// 1: A URL with the queries attached.
+    /// Panics
+    /// - When the get request cannot be completed
+    ///     Either the connection is off, or the url was malformed.
+    /// - When the JSON could not be parsed.
+    ///     Likely because unexpected fields or data types are present.
+    ///     If you find one, it is likely an error to be reported.
     fn complete_call(&self, in_url: String) -> BankResponse {
         let call_resp = reqwest::blocking::get(in_url).expect("Get Request Failed.");
-        // FIXME .json cannot serialize response's string to f32
         // println!("{:?}", call_resp);
         call_resp
             .json::<BankResponse>()
             .expect("json parser error.")
     }
 
+    // Legacy function for removing wrapping quotes on string.
+    // Not needed since serde deserializer, but it's here in case.
     // fn remove_wrapping_quotes(json_value: &serde_json::Value) -> &str {
     //     let re = Regex::new(r"[0-9.]+").expect(
     //         "Error making regex to filter wrapping quotes. This is a bug!"
@@ -81,23 +92,27 @@ impl BankCall {
 
         // call the bank for current rates
         let completed_call = &self.complete_call(complete_url.as_str().to_string());
-        
+
         // TODO: Remove this print line and let it be handled
         println!(
             "RBC's rate for {1} to {2}: {0}",
-            &completed_call.frate,
-            &self.params["from"],
-            &self.params["to"]
+            &completed_call.frate, &self.params["from"], &self.params["to"]
         );
 
         // Current rates are returned as owned because they are unique per call.
         // From and To are always available in the call, so refs are fine.
-        (completed_call.frate, &self.params["from"], &self.params["to"])
+        (
+            completed_call.frate,
+            &self.params["from"],
+            &self.params["to"],
+        )
     }
 }
 
 const RBC_RATES_URL: &str =
     "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
+const TD_RATES_URL: &str = 
+    "https://tool.td.com/fxcal/api/fxservice/getNonCashFeed";
 pub fn call_rbc(from_cur: String, to_cur: String) {
     let rbc_call = BankCall::new(
         RBC_RATES_URL.to_string(),
