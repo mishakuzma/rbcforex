@@ -43,7 +43,7 @@ where
     T: Deserialize<'de>,
 {
     // FIXME: This does not translate values to f32. Its because the string
-    //  is read in as \"1.26\" or similar. I think the \ is breaking.
+    //  is read in as \"1.26\" or similar. F64 works though. We love floats v doubles. 
     let string_de = <&str>::deserialize(deserializer)?;
     let return_value = serde_json::from_str(string_de).map_err(serde::de::Error::custom)?;
     Ok(return_value)
