@@ -115,6 +115,8 @@ impl BankCall {
 
         // Current rates are returned as owned because they are unique per call.
         // From and To are always available in the call, so refs are fine.
+        // TODO This makes sense for RBC, but not for other banks.
+        // TODO It would be more readable as a hashmap tbh
         (
             completed_call.frate,
             &self.params["from"],
