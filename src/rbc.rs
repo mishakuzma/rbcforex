@@ -1,6 +1,6 @@
 /// This module handles requests being made to the
 /// Royal Bank of Canada (RBC).
-use crate::BankCall::BankCall;
+use crate::bank_call::BankCall;
 use std::collections::HashMap;
 
 const RBC_RATES_URL: &str =

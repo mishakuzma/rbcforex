@@ -1,10 +1,16 @@
-use clap::Parser;
+use bank_call::BankCall;
+use clap::{Parser, ValueEnum};
+use anyhow::Result;
 
 mod bank_call;
 mod bank_response;
 
 mod rbc;
 mod td;
+// NEVERMIND:Find out where CIBC makes their rates available from.
+// CIBC doesnt carry foreign currency. You have to order ahead. Probs not worth making something for them.
+// const CIBC_RATES_URL: &str = "";
+
 #[derive(Parser)]
 pub struct CliInputs {
     // Users would input the command like this:
@@ -14,13 +20,14 @@ pub struct CliInputs {
     pub from_cur: String,
     /// to_cur(String) REQUIRED: currency you want to receive by giving from_cur. Case insensitive.
     pub to_cur: String,
-    // trader(String) OPTIONAL: The organization(s) you want to trade with.
+    // trader(Trader) OPTIONAL: The organization(s) you want to trade with.
+    // This is an enum which is validated.
     // Default: All
     // Options (all case insensive)
     // -RBC - Royal Bank of Canada
     // -TD - TD Bank of Canada (NOT AVAILABLE)
-    // #[clap(default_value_t = String::from("All"))]
-    // pub trader: String,
+    #[clap(default_value = crate::Trader::All)]
+    pub trader: Trader,
     // hard_cash(bool) OPTIONAL: Whether you want rates for ordered physical currency.
     // Some orgs, such as TD, offer different rates if you order non-cash vs cash.
     // Setting this to true will simulate ordering physical money.
@@ -29,12 +36,28 @@ pub struct CliInputs {
     // pub hard_cash: bool,
 }
 
-// NOTE TD lets you pick between cash and non cash. 
-//  I should add this as a feature for CLI.
-// Also note: this one gives you all of the rates in a xml. So it would have
-//  to be parsed.
-const TD_RATES_URL: &str = 
-    "https://tool.td.com/fxcal/api/fxservice/getNonCashFeed";
-// NEVERMIND:Find out where CIBC makes their rates available from.
-// CIBC doesnt carry foreign currency. You have to order ahead. Probs not worth making something for them.
-// const CIBC_RATES_URL: &str = "";
+#[derive(Clone, ValueEnum)]
+enum Trader {
+    All,
+    RBC,
+    TD,
+}
+
+/// Takes a list of user inputs and returns a bank call needing to be made.
+/// Errors
+/// - If user input is malformed.
+pub fn handleInput(inArgs: CliInputs) -> Result<BankCall> {
+    // If trader is not a known bank, it is an error.
+    let given_trader: Option<&str> = match inArgs.trader {
+        All => Some("All"),
+        RBC => Some("RBC"),
+        TD=> Some("TD"),
+        _ => None,
+    };
+
+    // Currencies given must be known.
+
+    // Errors handled, call is ready to be returned.
+
+    // User args die after this point, which is fine since we don't need it.
+}
