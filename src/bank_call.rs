@@ -3,7 +3,7 @@
 /// when this crate was made originally.
 use std::collections::HashMap;
 use url::Url;
-use crate::BankResponse::BankResponse;
+use crate::bank_response::BankResponse;
 pub struct BankCall {
     url: String,
     params: HashMap<String, String>,

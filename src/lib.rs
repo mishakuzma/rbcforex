@@ -1,8 +1,10 @@
 use clap::Parser;
 
+mod bank_call;
+mod bank_response;
+
 mod rbc;
-mod BankCall;
-mod BankResponse;
+mod td;
 #[derive(Parser)]
 pub struct CliInputs {
     // Users would input the command like this:
