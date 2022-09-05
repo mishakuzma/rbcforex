@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use bank_call::BankCall;
 use clap::{Parser, ValueEnum};
-use anyhow::Result;
+use anyhow::{Result, Context};
 
 mod bank_call;
 mod bank_response;
@@ -61,15 +61,21 @@ pub fn handle_input(inArgs: CliInputs) -> Option<BankCall> {
         TD=> Some("TD"),
         _ => None,
     };
+    // TODO Refactor this function. Validating and setting up the caller are
+    //  two different jobs. This function should compose everything instead.
 
     // It is an error if we don't know what trader is being referenced
-    assert!(given_trader.is_some());
+    // If its fine, then our Ok() contains the known trader
+    // TODO this logic should belong to the part where given_trader is used.
+    given_trader.ok_or_else(|| "Unknown trader error");
 
     // TODO 
     // Once we know what trader is being referenced, we need to get the right
     // url and have that as a string
     let confirmed_trader = "placeholder";
+    
     // Currencies given must be known.
+    // We can check by trying to find the key inside of the const hashmap
     let given_from_currency = inArgs.from_cur;
     let given_to_currency = inArgs.to_cur;
 
