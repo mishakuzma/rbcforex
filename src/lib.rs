@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use bank_call::BankCall;
 use clap::{Parser, ValueEnum};
 use anyhow::Result;
@@ -7,6 +9,11 @@ mod bank_response;
 
 mod rbc;
 mod td;
+
+const CURRENCY_ALIAS: HashMap<&str, &str> = HashMap::from([
+    ("cad","Canadian Dollar"),
+    ("can","Canadian Dollar"),
+    ]);
 // NEVERMIND:Find out where CIBC makes their rates available from.
 // CIBC doesnt carry foreign currency. You have to order ahead. Probs not worth making something for them.
 // const CIBC_RATES_URL: &str = "";
@@ -46,7 +53,7 @@ enum Trader {
 /// Takes a list of user inputs and returns a bank call needing to be made.
 /// Errors
 /// - If user input is malformed.
-pub fn handleInput(inArgs: CliInputs) -> Result<BankCall> {
+pub fn handle_input(inArgs: CliInputs) -> Result<BankCall> {
     // If trader is not a known bank, it is an error.
     let given_trader: Option<&str> = match inArgs.trader {
         All => Some("All"),
@@ -54,7 +61,7 @@ pub fn handleInput(inArgs: CliInputs) -> Result<BankCall> {
         TD=> Some("TD"),
         _ => None,
     };
-
+    assert!(given_trader.is_some());
     // Currencies given must be known.
 
     // Errors handled, call is ready to be returned.

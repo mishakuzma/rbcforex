@@ -7,7 +7,7 @@ fn main() {
     // Call handler
     // Because the handler is the only part where user input matters,
     // the handler takes ownership of the inputs.
-    rust_forexcan::handleInput(args);    
+    rust_forexcan::handle_input(args);    
 
     // Display result
 }
