@@ -6,6 +6,7 @@ use url::Url;
 use crate::bank_response::BankResponse;
 pub struct BankCall {
     url: String,
+    // TODO this hashmap probably can take just string slices
     params: HashMap<String, String>,
 }
 

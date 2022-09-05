@@ -53,7 +53,7 @@ enum Trader {
 /// Takes a list of user inputs and returns a bank call needing to be made.
 /// Errors
 /// - If user input is malformed.
-pub fn handle_input(inArgs: CliInputs) -> Result<BankCall> {
+pub fn handle_input(inArgs: CliInputs) -> Option<BankCall> {
     // If trader is not a known bank, it is an error.
     let given_trader: Option<&str> = match inArgs.trader {
         All => Some("All"),
@@ -61,10 +61,24 @@ pub fn handle_input(inArgs: CliInputs) -> Result<BankCall> {
         TD=> Some("TD"),
         _ => None,
     };
+
+    // It is an error if we don't know what trader is being referenced
     assert!(given_trader.is_some());
+
+    // TODO 
+    // Once we know what trader is being referenced, we need to get the right
+    // url and have that as a string
+    let confirmed_trader = "placeholder";
     // Currencies given must be known.
+    let given_from_currency = inArgs.from_cur;
+    let given_to_currency = inArgs.to_cur;
+
 
     // Errors handled, call is ready to be returned.
-
-    // User args die after this point, which is fine since we don't need it.
+    let structed_bankcall = BankCall::new(inArgs.trader,
+    HashMap::from([
+        ("do".to_owned(), "conv".to_owned())
+    ]));
+    Some(structed_bankcall)
+    // User args die after this point, which is fine since we don't need it now.
 }
