@@ -46,7 +46,7 @@ pub struct CliInputs {
 arg_enum!{
     #[derive(Clone, ValueEnum)]
     enum Trader {
-        All,
+        // All,
         RBC,
         TD,
     }
@@ -61,7 +61,7 @@ impl ConvertEnumToUrl for Trader {
         // TODO Trader should not handle conversion to url, because it will
         //  be expected to handle the All variant
        match self {
-           Trader::All => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
+        //    Trader::All => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
            Trader::RBC => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
            Trader::TD => Err(anyhow!("TD not implemented yet."))
        } 
@@ -79,9 +79,9 @@ impl ConvertEnumToUrl for Trader {
 fn check_trader(in_given_trader: Trader) -> anyhow::Result<Trader> {
     // If trader is not a known bank, it is an error.
     match in_given_trader {
-        All => Ok(All),
-        RBC => Ok(RBC),
-        TD=> Ok(TD),
+        // All => Ok(All),
+        Trader::RBC => Ok(Trader::RBC),
+        Trader::TD=> Ok(Trader::TD),
         _ => Err(anyhow!("Unknown trader")),
     }
 }
