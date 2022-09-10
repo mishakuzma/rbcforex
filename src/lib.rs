@@ -45,7 +45,7 @@ pub struct CliInputs {
 
 arg_enum!{
     #[derive(Clone, ValueEnum)]
-    enum Trader {
+    pub enum Trader {
         // All,
         RBC,
         TD,
@@ -89,10 +89,10 @@ fn check_trader(in_given_trader: Trader) -> anyhow::Result<Trader> {
 /// Takes a list of user inputs and returns a bank call needing to be made.
 /// Errors
 /// - If user input is malformed.
-pub fn handle_input(inArgs: CliInputs) -> Result<BankCall> {
+pub fn handle_input(in_args: CliInputs) -> Result<BankCall> {
     // Compose the bankcall, checking for validating errors along the way
     let structed_bankcall = BankCall::new(
-        check_trader(inArgs.trader)?
+        check_trader(in_args.trader)?
             .convert_to_url()?,
         HashMap::from([
             ("do".to_owned(), "conv".to_owned())
