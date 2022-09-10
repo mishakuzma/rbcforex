@@ -66,8 +66,8 @@ impl ConvertEnumToUrl for Trader {
        } 
     }
 }
-/// Takes an inputted trader and returns a string of the trader
-/// if the trader is valid.
+/// Legacy: Takes an inputted trader and returns a string of the trader
+/// if the trader is valid. Not needed anymore since this crate is only for RBC.
 /// 
 /// # Examples
 /// ```
