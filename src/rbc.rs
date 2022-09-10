@@ -6,7 +6,7 @@ use std::collections::HashMap;
 const RBC_RATES_URL: &str =
     "https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?";
 
-pub fn call_rbc(from_cur: String, to_cur: String) {
+pub fn call(from_cur: String, to_cur: String) {
     let rbc_call = BankCall::new(
         RBC_RATES_URL.to_string(),
         HashMap::from([
