@@ -8,7 +8,6 @@ mod bank_call;
 mod bank_response;
 
 mod rbc;
-mod td;
 
 // const CURRENCY_ALIAS: HashMap<&str, &str> = HashMap::from([
     // ("cad","Canadian Dollar"),
