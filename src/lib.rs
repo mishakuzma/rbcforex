@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use bank_call::BankCall;
-use clap::{Parser, ValueEnum};
-use anyhow::{Result, Context};
+use clap::{Parser, ValueEnum, arg_enum};
+use anyhow::{Result, Context, anyhow};
 
 mod bank_call;
 mod bank_response;
@@ -33,7 +33,7 @@ pub struct CliInputs {
     // Options (all case insensive)
     // -RBC - Royal Bank of Canada
     // -TD - TD Bank of Canada (NOT AVAILABLE)
-    #[clap(default_value = crate::Trader::All)]
+    #[clap(default_value = "All")]
     pub trader: Trader,
     // hard_cash(bool) OPTIONAL: Whether you want rates for ordered physical currency.
     // Some orgs, such as TD, offer different rates if you order non-cash vs cash.
@@ -43,13 +43,30 @@ pub struct CliInputs {
     // pub hard_cash: bool,
 }
 
-#[derive(Clone, ValueEnum)]
-enum Trader {
-    All,
-    RBC,
-    TD,
+arg_enum!{
+    #[derive(Clone, ValueEnum)]
+    enum Trader {
+        All,
+        RBC,
+        TD,
+    }
 }
 
+trait ConvertEnumToUrl {
+    fn convert_to_url(&self) -> Result<String>;
+}
+
+impl ConvertEnumToUrl for Trader {
+    fn convert_to_url(&self) -> Result<String> {
+        // TODO Trader should not handle conversion to url, because it will
+        //  be expected to handle the All variant
+       match self {
+           Trader::All => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
+           Trader::RBC => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
+           Trader::TD => Err(anyhow!("TD not implemented yet."))
+       } 
+    }
+}
 /// Takes an inputted trader and returns a string of the trader
 /// if the trader is valid.
 /// 
@@ -59,49 +76,27 @@ enum Trader {
 /// assert(result.is_ok());
 /// ```
 /// 
-fn check_trader(in_given_trader: Trader) -> Result<&str> {
+fn check_trader(in_given_trader: Trader) -> anyhow::Result<Trader> {
     // If trader is not a known bank, it is an error.
     match in_given_trader {
-        All => Ok("All"),
-        RBC => Ok("RBC"),
-        TD=> Ok("TD"),
-        _ => Err(()),
+        All => Ok(All),
+        RBC => Ok(RBC),
+        TD=> Ok(TD),
+        _ => Err(anyhow!("Unknown trader")),
     }
-}
-
-fn validate_input() -> {
-
 }
 
 /// Takes a list of user inputs and returns a bank call needing to be made.
 /// Errors
 /// - If user input is malformed.
-pub fn handle_input(inArgs: CliInputs) -> Option<BankCall> {
-    
-    // TODO Refactor this function. Validating and setting up the caller are
-    //  two different jobs. This function should compose everything instead.
-
-    // It is an error if we don't know what trader is being referenced
-    // If its fine, then our Ok() contains the known trader
-    // TODO this logic should belong to the part where given_trader is used.
-    given_trader.ok_or_else(|| "Unknown trader error");
-
-    // TODO 
-    // Once we know what trader is being referenced, we need to get the right
-    // url and have that as a string
-    let confirmed_trader = "placeholder";
-    
-    // Currencies given must be known.
-    // We can check by trying to find the key inside of the const hashmap
-    let given_from_currency = inArgs.from_cur;
-    let given_to_currency = inArgs.to_cur;
-
-
-    // Errors handled, call is ready to be returned.
-    let structed_bankcall = BankCall::new(inArgs.trader,
-    HashMap::from([
-        ("do".to_owned(), "conv".to_owned())
-    ]));
-    Some(structed_bankcall)
+pub fn handle_input(inArgs: CliInputs) -> Result<BankCall> {
+    // Compose the bankcall, checking for validating errors along the way
+    let structed_bankcall = BankCall::new(
+        check_trader(inArgs.trader)?
+            .convert_to_url()?,
+        HashMap::from([
+            ("do".to_owned(), "conv".to_owned())
+            ]));
+    Ok(structed_bankcall)
     // User args die after this point, which is fine since we don't need it now.
 }
