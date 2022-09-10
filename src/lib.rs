@@ -10,10 +10,10 @@ mod bank_response;
 mod rbc;
 mod td;
 
-const CURRENCY_ALIAS: HashMap<&str, &str> = HashMap::from([
-    ("cad","Canadian Dollar"),
-    ("can","Canadian Dollar"),
-    ]);
+// const CURRENCY_ALIAS: HashMap<&str, &str> = HashMap::from([
+    // ("cad","Canadian Dollar"),
+    // ("can","Canadian Dollar"),
+    // ]);
 // NEVERMIND:Find out where CIBC makes their rates available from.
 // CIBC doesnt carry foreign currency. You have to order ahead. Probs not worth making something for them.
 // const CIBC_RATES_URL: &str = "";
