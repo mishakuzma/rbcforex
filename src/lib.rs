@@ -47,7 +47,7 @@ arg_enum!{
     pub enum Trader {
         // All,
         RBC,
-        TD,
+        // TD,
     }
 }
 
@@ -62,7 +62,7 @@ impl ConvertEnumToUrl for Trader {
        match self {
         //    Trader::All => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
            Trader::RBC => Ok("https://online.royalbank.com/cgi-bin/tools/foreign-exchange-calculator/rates.cgi?".to_string()),
-           Trader::TD => Err(anyhow!("TD not implemented yet."))
+        //    Trader::TD => Err(anyhow!("TD not implemented yet."))
        } 
     }
 }
@@ -80,7 +80,7 @@ fn check_trader(in_given_trader: Trader) -> anyhow::Result<Trader> {
     match in_given_trader {
         // All => Ok(All),
         Trader::RBC => Ok(Trader::RBC),
-        Trader::TD=> Ok(Trader::TD),
+        // Trader::TD=> Ok(Trader::TD),
         _ => Err(anyhow!("Unknown trader")),
     }
 }
