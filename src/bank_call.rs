@@ -20,10 +20,11 @@ impl BankCall {
     }
 
     /// Complete call takes a String and returns a completed BankResponse.
+    /// 
     /// Inputs
     /// 0: &self
     /// 1: A URL with the queries attached.
-    /// Panics
+    /// # Panics
     /// - When the get request cannot be completed
     ///     Either the connection is off, or the url was malformed.
     /// - When the JSON could not be parsed.

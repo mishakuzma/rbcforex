@@ -50,17 +50,34 @@ enum Trader {
     TD,
 }
 
+/// Takes an inputted trader and returns a string of the trader
+/// if the trader is valid.
+/// 
+/// # Examples
+/// ```
+/// let result = rust_forexcan::check_trader(Trader::RBC);
+/// assert(result.is_ok());
+/// ```
+/// 
+fn check_trader(in_given_trader: Trader) -> Result<&str> {
+    // If trader is not a known bank, it is an error.
+    match in_given_trader {
+        All => Ok("All"),
+        RBC => Ok("RBC"),
+        TD=> Ok("TD"),
+        _ => Err(()),
+    }
+}
+
+fn validate_input() -> {
+
+}
+
 /// Takes a list of user inputs and returns a bank call needing to be made.
 /// Errors
 /// - If user input is malformed.
 pub fn handle_input(inArgs: CliInputs) -> Option<BankCall> {
-    // If trader is not a known bank, it is an error.
-    let given_trader: Option<&str> = match inArgs.trader {
-        All => Some("All"),
-        RBC => Some("RBC"),
-        TD=> Some("TD"),
-        _ => None,
-    };
+    
     // TODO Refactor this function. Validating and setting up the caller are
     //  two different jobs. This function should compose everything instead.
 
