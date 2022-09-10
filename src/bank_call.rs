@@ -47,12 +47,15 @@ impl BankCall {
     //     return re.find(&json_value.as_str().unwrap()).unwrap().as_str();
     // }
 
+    /// Gives result of currency conversion, and what conversion took place.
+    /// 
     /// Returns a 3 item tuple, where
     /// 0: The unit rate of currency (f64)
     /// 1: The currency that was given (&String)
     /// 2: The currency that was received (&String)
     /// The currencies exchanged are references to the bankcall object fields.
-    /// Panics
+    /// 
+    /// # Panics
     /// When the url cannot be parsed, likely because the arguments are wrong.
     pub fn execute(&self) -> (f64, &String, &String) {
         // Create the url that we are going to send for our request.
@@ -78,5 +81,15 @@ impl BankCall {
             &self.params["from"],
             &self.params["to"],
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_completeurl_rbc() {
+
     }
 }
