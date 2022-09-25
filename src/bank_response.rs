@@ -9,8 +9,8 @@ use serde::{Deserialize, Deserializer};
 pub struct BankResponse {
     // F64 is used because it does not seem to work to deserialize into F32.
     //     I've checked the serde docs and it does not seem to be a f32 method.
-    // #[serde(deserialize_with = "deserialize_f64")]
-    // amount: f64,
+    #[serde(deserialize_with = "deserialize_f64")]
+    amount: f64,
     #[serde(deserialize_with = "deserialize_f64")]
     frate: f64,
 }
@@ -28,8 +28,12 @@ where
 }
 
 impl BankResponse {
+    /// amount is a getter for the amount from a completed bank call.
+    pub fn amount(self: &Self) -> f64 {
+        self.amount
+    }
     /// get_frate is a getter for the frate for a completed bank call.
-    pub fn get_frate(self: &Self) -> f64 {
+    pub fn frate(self: &Self) -> f64 {
        self.frate 
     }
 }

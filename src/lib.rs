@@ -7,7 +7,7 @@ use anyhow::{Result, Context, anyhow};
 mod bank_call;
 mod bank_response;
 
-mod rbc;
+pub mod rbc;
 
 // const CURRENCY_ALIAS: HashMap<&str, &str> = HashMap::from([
     // ("cad","Canadian Dollar"),
@@ -86,7 +86,7 @@ fn check_trader(in_given_trader: Trader) -> anyhow::Result<Trader> {
 }
 
 /// Takes a list of user inputs and returns a bank call needing to be made.
-/// Errors
+/// # Errors
 /// - If user input is malformed.
 pub fn handle_input(in_args: CliInputs) -> Result<BankCall> {
     // Compose the bankcall, checking for validating errors along the way

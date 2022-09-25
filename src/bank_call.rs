@@ -4,17 +4,26 @@
 use std::collections::HashMap;
 use url::Url;
 use crate::bank_response::BankResponse;
+
+/// Struct representing the parameters issued to a bank's forex api.
+/// 
+/// Building this call should consume the inputs, and the struct is dropped once
+/// the response is generated. This is done as the results are only accurate per
+/// each request to the API, so the completed call should not hang around in 
+/// case it causes a confounding call.
 pub struct BankCall {
     url: String,
-    // TODO this hashmap probably can take just string slices
     params: HashMap<String, String>,
 }
 
 impl BankCall {
+    /// Generates a new bank call from owned inputs.
     pub fn new(url: String, params: HashMap<String, String>) -> Self {
+        // Creating a bankcall requires owned inputs so they can be dropped.
         Self { url, params }
     }
 
+    /// Creates a valid URL that is used to call the bank.
     fn complete_url(&self) -> Result<Url, url::ParseError> {
         Url::parse_with_params(&self.url, &self.params)
     }
@@ -70,15 +79,14 @@ impl BankCall {
         // TODO: Remove this print line and let it be handled
         println!(
             "RBC's rate for {1} to {2}: {0}",
-            completed_call.get_frate(), &self.params["from"], &self.params["to"]
+            completed_call.frate(), &self.params["from"], &self.params["to"]
         );
 
         // Current rates are returned as owned because they are unique per call.
         // From and To are always available in the call, so refs are fine.
-        // TODO This makes sense for RBC, but not for other banks.
         // TODO It would be more readable as a hashmap tbh
         (
-            completed_call.get_frate(),
+            completed_call.frate(),
             &self.params["from"],
             &self.params["to"],
         )
